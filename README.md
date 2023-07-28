@@ -51,6 +51,7 @@ settings:
     skip_cert_verify: false #跳过证书有效校验
     timeout: 5 #网络请求超时时间（秒，正整数）
     interfaces: "" #网卡名称正则（注意转义），如：eth0\.[2-3]，不为空时为多网卡模式
+    ignore_public_ip: true # 设定为true时，分配到公网ip将认为已经登录
   guardian: #守护模式（后台常驻）
     enable: false 
     duration: 300 #网络检查周期（秒，正整数）
