@@ -1,13 +1,14 @@
 package global
 
 import (
+	"os"
+	"time"
+
 	"github.com/Mmx233/BitSrunLoginGo/internal/global/models"
 	"github.com/Mmx233/BitSrunLoginGo/pkg/srun"
 	"github.com/Mmx233/tool"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"os"
-	"time"
 )
 
 var Config models.Config
@@ -28,7 +29,8 @@ func readConfig() {
 	})
 	viper.SetDefault("settings", models.Settings{
 		Basic: models.Basic{
-			Timeout: 5,
+			Timeout:        5,
+			IgnorePublicIP: true,
 		},
 		Guardian: models.Guardian{
 			Duration: 300,

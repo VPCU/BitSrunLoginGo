@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/Mmx233/BitSrunLoginGo/internal/global"
 	"github.com/Mmx233/BitSrunLoginGo/internal/pkg/dns"
 	"github.com/Mmx233/BitSrunLoginGo/pkg/srun"
 	"github.com/Mmx233/BitSrunLoginGo/tools"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // Login 登录逻辑
@@ -48,7 +49,7 @@ func Login(eth *tools.Eth, debugOutput bool) error {
 
 	output("正在获取登录状态")
 
-	online, ip, e := srunClient.LoginStatus()
+	online, ip, e := srunClient.LoginStatus(global.Config.Settings.Basic.IgnorePublicIP)
 	if e != nil {
 		return e
 	}

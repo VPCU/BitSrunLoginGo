@@ -3,9 +3,10 @@ package srun
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Conf struct {
@@ -30,7 +31,7 @@ type Srun struct {
 	api       Api
 }
 
-func (c Srun) LoginStatus() (online bool, ip string, e error) {
+func (c Srun) LoginStatus(ignorePublicIP bool) (online bool, ip string, e error) {
 	res, e := c.api.GetUserInfo()
 	if e != nil {
 		return false, "", e
@@ -49,8 +50,14 @@ func (c Srun) LoginStatus() (online bool, ip string, e error) {
 		}
 	}
 
-	// 如果深澜分配的 ip 不是内网 ip，说明已经在线且拥有固定 ip
 	ip = ipInterface.(string)
+
+	if !ignorePublicIP {
+		online = err.(string) == "ok"
+		return
+	}
+
+	// 如果深澜分配的 ip 不是内网 ip，说明已经在线且拥有固定 ip
 
 	inet := strings.HasPrefix(ip, "192.168.") || strings.HasPrefix(ip, "10.") || strings.HasPrefix(ip, "172.")
 
