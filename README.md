@@ -14,7 +14,7 @@ Openwrt 可以参考 [immortalwrt/packages/net/bitsrunlogin-go](https://github.c
 
 编译结果为可执行文件，下载 release 或编译后直接运行即可
 
-首次运行将自动生成配置文件，首次使用建议开启调试日志（`settings.log.debug_level`），可以通过添加启动参数 `--config` 指定配置文件路径，默认为当前目录的 `Config.yaml`
+首次运行将自动生成配置文件，首次使用建议开启调试日志（`settings.log.debug_level`），可以通过添加启动参数 `--config` 指定配置文件路径，默认为 `~/.config/bitsrun.yaml`
 
 支持 `json`、`yaml`、`yml`、`toml`、`hcl`、`tfvars` 等，仅对 `json`和`yaml` 进行了优化与测试
 

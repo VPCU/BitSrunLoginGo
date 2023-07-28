@@ -2,6 +2,10 @@ package global
 
 import (
 	"flag"
+	"os"
+	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var Flags struct {
@@ -16,7 +20,12 @@ var Flags struct {
 }
 
 func initFlags() {
-	flag.StringVar(&Flags.Path, "config", "Config.yaml", "config path")
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln("[init] 获取用户目录失败：", err)
+	}
+	default_path := filepath.Join(homedir, ".config", "bitsrun.yaml")
+	flag.StringVar(&Flags.Path, "config", default_path, "config path")
 
 	flag.StringVar(&Flags.Interface, "interface", "", "specify the eth name")
 	flag.BoolVar(&Flags.Debug, "debug", false, "enable debug mode")

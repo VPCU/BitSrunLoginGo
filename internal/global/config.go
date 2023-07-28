@@ -2,6 +2,7 @@ package global
 
 import (
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/Mmx233/BitSrunLoginGo/internal/global/models"
@@ -49,6 +50,11 @@ func readConfig() {
 	if exist, e := tool.File.Exists(Flags.Path); e != nil {
 		log.Fatalln("[init] 读取配置文件失败：", e)
 	} else if !exist {
+		// create sub dir
+
+		if e := os.MkdirAll(filepath.Dir(Flags.Path), os.ModePerm); e != nil {
+			log.Fatalln("[init] 创建配置文件目录失败：", e)
+		}
 		e = viper.WriteConfigAs(Flags.Path)
 		if e != nil {
 			log.Fatalln("[init] 生成配置文件失败：", e)
