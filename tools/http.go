@@ -1,7 +1,10 @@
 package tools
 
 import (
-	"github.com/Mmx233/BitSrunLoginGo/internal/global"
+	"github.com/VPCU/BitSrunLoginGo/internal/config"
+	"github.com/VPCU/BitSrunLoginGo/internal/config/flags"
+	log "github.com/sirupsen/logrus"
+	"net"
 	"net/http"
 )
 
@@ -14,10 +17,27 @@ var HttpPack *Http
 var httpTools map[string]*Http
 
 func init() {
-	if global.Config.Settings.Basic.Interfaces == "" {
-		HttpPack = genHttpPack(nil)
+	if config.Settings.Basic.Interfaces == "" {
+		var eth *Eth
+		if flags.Interface != "" {
+			netEth, err := net.InterfaceByName(flags.Interface)
+			if err != nil {
+				log.Warnf("获取指定网卡 %s 失败，使用默认网卡: %v", flags.Interface, err)
+			} else {
+				eth, err = ConvertInterface(*netEth)
+				if err != nil {
+					log.Warnf("获取指定网卡 %s ip 地址失败，使用默认网卡: %v", flags.Interface, err)
+				} else if eth == nil {
+					log.Warnf("指定网卡 %s 无可用 ip 地址，使用默认网卡", flags.Interface)
+				} else {
+					log.Debugf("使用指定网卡 %s ip: %s", eth.Name, eth.Addr.String())
+				}
+			}
+		}
+
+		HttpPack = genHttpPack(eth)
 	} else {
-		httpTools = make(map[string]*Http, 0)
+		httpTools = make(map[string]*Http)
 	}
 }
 
