@@ -3,13 +3,14 @@ package srun
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Mmx233/tool"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/Mmx233/tool"
+	log "github.com/sirupsen/logrus"
 )
 
 type Api struct {
@@ -27,10 +28,11 @@ func (a *Api) Init(https bool, domain string, client *http.Client) {
 	a.BaseUrl = a.BaseUrl + "://" + domain + "/"
 
 	// 初始化 http client
-	a.Client = client
-	a.NoDirect = &(*client)
-	a.NoDirect.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
-		return http.ErrUseLastResponse
+	a.NoDirect = &http.Client{
+		Transport: client.Transport, Jar: client.Jar, Timeout: client.Timeout,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
 	}
 }
 
@@ -44,26 +46,26 @@ func (a *Api) request(path string, query map[string]interface{}) (map[string]int
 	query["callback"] = callback
 	query["_"] = timestamp
 	httpTool := tool.NewHttpTool(a.Client)
-	req, e := httpTool.GenReq("GET", &tool.DoHttpReq{
+	req, err := httpTool.GenReq("GET", &tool.DoHttpReq{
 		Url:   a.BaseUrl + path,
 		Query: query,
 	})
-	if e != nil {
-		log.Debugln(e)
-		return nil, e
+	if err != nil {
+		log.Debugln(err)
+		return nil, err
 	}
 
-	resp, e := httpTool.Client.Do(req)
-	if e != nil {
-		log.Debugln(e)
-		return nil, e
+	resp, err := httpTool.Client.Do(req)
+	if err != nil {
+		log.Debugln(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	data, e := io.ReadAll(resp.Body)
-	if e != nil {
-		log.Debugln(e)
-		return nil, e
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Debugln(err)
+		return nil, err
 	}
 	res := string(data)
 
@@ -83,9 +85,9 @@ func (a *Api) DetectAcid() (string, error) {
 	addr := a.BaseUrl
 	for {
 		log.Debugln("HTTP GET ", addr)
-		res, e := a.NoDirect.Get(addr)
-		if e != nil {
-			return "", e
+		res, err := a.NoDirect.Get(addr)
+		if err != nil {
+			return "", err
 		}
 		_ = res.Body.Close()
 		loc := res.Header.Get("location")
@@ -97,9 +99,9 @@ func (a *Api) DetectAcid() (string, error) {
 			}
 
 			var u *url.URL
-			u, e = url.Parse(addr)
-			if e != nil {
-				return "", e
+			u, err = url.Parse(addr)
+			if err != nil {
+				return "", err
 			}
 			acid := u.Query().Get(`ac_id`)
 			if acid != "" {

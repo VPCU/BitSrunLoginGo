@@ -3,10 +3,8 @@ package srun
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
-	"strings"
-
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 type Conf struct {
@@ -31,13 +29,13 @@ type Srun struct {
 	api       Api
 }
 
-func (c Srun) LoginStatus(ignorePublicIP bool) (online bool, ip string, e error) {
-	res, e := c.api.GetUserInfo()
-	if e != nil {
-		return false, "", e
+func (c Srun) LoginStatus() (online bool, ip string, err error) {
+	res, err := c.api.GetUserInfo()
+	if err != nil {
+		return false, "", err
 	}
 
-	err, ok := res["error"]
+	errRes, ok := res["error"]
 	if !ok {
 		return false, "", ErrResultCannotFound
 	}
@@ -51,18 +49,7 @@ func (c Srun) LoginStatus(ignorePublicIP bool) (online bool, ip string, e error)
 	}
 
 	ip = ipInterface.(string)
-
-	if !ignorePublicIP {
-		online = err.(string) == "ok"
-		return
-	}
-
-	// 如果深澜分配的 ip 不是内网 ip，说明已经在线且拥有固定 ip
-
-	inet := strings.HasPrefix(ip, "192.168.") || strings.HasPrefix(ip, "10.") || strings.HasPrefix(ip, "172.")
-
-	online = err.(string) == "ok" || !inet
-
+	online = errRes.(string) == "ok"
 	return
 }
 
@@ -70,12 +57,12 @@ func (c Srun) DoLogin(clientIP string) error {
 	log.Debugln("正在获取 Token")
 
 	if c.LoginInfo.Form.UserType != "" {
-		c.LoginInfo.Form.UserName += "@" + c.LoginInfo.Form.UserType
+		c.LoginInfo.Form.Username += "@" + c.LoginInfo.Form.UserType
 	}
 
-	res, e := c.api.GetChallenge(c.LoginInfo.Form.UserName, clientIP)
-	if e != nil {
-		return e
+	res, err := c.api.GetChallenge(c.LoginInfo.Form.Username, clientIP)
+	if err != nil {
+		return err
 	}
 	token, ok := res["challenge"]
 	if !ok {
@@ -86,28 +73,28 @@ func (c Srun) DoLogin(clientIP string) error {
 
 	log.Debugln("发送登录请求")
 
-	info, e := json.Marshal(map[string]string{
-		"username": c.LoginInfo.Form.UserName,
-		"password": c.LoginInfo.Form.PassWord,
+	info, err := json.Marshal(map[string]string{
+		"username": c.LoginInfo.Form.Username,
+		"password": c.LoginInfo.Form.Password,
 		"ip":       clientIP,
 		"acid":     c.LoginInfo.Meta.Acid,
 		"enc_ver":  c.LoginInfo.Meta.Enc,
 	})
-	if e != nil {
-		return e
+	if err != nil {
+		return err
 	}
 	EncryptedInfo := "{SRBX1}" + Base64(XEncode(string(info), tokenStr))
 	Md5Str := Md5(tokenStr)
 	EncryptedMd5 := "{MD5}" + Md5Str
 	EncryptedChkstr := Sha1(
-		tokenStr + c.LoginInfo.Form.UserName + tokenStr + Md5Str +
+		tokenStr + c.LoginInfo.Form.Username + tokenStr + Md5Str +
 			tokenStr + c.LoginInfo.Meta.Acid + tokenStr + clientIP +
 			tokenStr + c.LoginInfo.Meta.N + tokenStr + c.LoginInfo.Meta.Type +
 			tokenStr + EncryptedInfo,
 	)
 
-	res, e = c.api.Login(
-		c.LoginInfo.Form.UserName,
+	res, err = c.api.Login(
+		c.LoginInfo.Form.Username,
 		EncryptedMd5,
 		c.LoginInfo.Meta.Acid,
 		clientIP,
@@ -116,8 +103,8 @@ func (c Srun) DoLogin(clientIP string) error {
 		c.LoginInfo.Meta.N,
 		c.LoginInfo.Meta.Type,
 	)
-	if e != nil {
-		return e
+	if err != nil {
+		return err
 	}
 	var result interface{}
 	result, ok = res["error"]

@@ -1,8 +1,13 @@
-  # BitSrunLoginGo
+# BitSrunLoginGo
 
 [![Lisense](https://img.shields.io/github/license/Mmx233/BitSrunLoginGo)](https://github.com/Mmx233/BitSrunLoginGo/blob/main/LICENSE)
 [![Release](https://img.shields.io/github/v/release/Mmx233/BitSrunLoginGo?color=blueviolet&include_prereleases)](https://github.com/Mmx233/BitSrunLoginGo/releases)
 [![GoReport](https://goreportcard.com/badge/github.com/Mmx233/BitSrunLoginGo)](https://goreportcard.com/report/github.com/Mmx233/BitSrunLoginGo)
+
+
+对项目[BitSrunLoginGo](https://github.com/Mmx233/BitSrunLoginGo)做了修改，可用于ECNU校园网认证。当前版本在[BitSrunLoginGo](https://github.com/Mmx233/BitSrunLoginGo)基础上修改了配置文件的默认位置，和支持重定向到https。
+
+-----
 
 深澜校园网登录脚本 Go 语言版。GO 语言可以直接交叉编译出 mips 架构可执行程序（路由器）（主流平台更不用说了），从而免除安装环境。
 
@@ -14,16 +19,16 @@ Openwrt 可以参考 [immortalwrt/packages/net/bitsrunlogin-go](https://github.c
 
 编译结果为可执行文件，下载 release 或编译后直接运行即可
 
-首次运行将自动生成配置文件，首次使用建议开启调试日志（`settings.log.debug_level`），可以通过添加启动参数 `--config` 指定配置文件路径，默认为 `~/.config/bitsrun.yaml`
+首次运行将自动生成配置文件，首次使用建议开启调试日志（`settings.log.debug_level` 设为 `true` 或使用 flag `--debug`），可以通过添加启动参数 `--config` 指定配置文件路径，默认为`~/.config/bitsrun.yaml`
 
-支持 `json`、`yaml`、`yml`、`toml`、`hcl`、`tfvars` 等，仅对 `json`和`yaml` 进行了优化与测试
+配置类型支持 `json`、`yaml`，默认使用 `yaml`
 
 ```shell
 ./bitsrun --config=./another-config.yaml
 ./bitsrun --config=/demo/i.json
 ```
 
-其他 Flags:
+其他 flags:
 
 ```text
 --interface eth0.1  #指定使用 eth0.1 登录，多网卡模式无效
@@ -38,7 +43,7 @@ Config.yaml 说明：
 form:
   domain: www.msftconnecttest.com #登录地址 ip 或域名
   username: "" #账号
-  usertype: cmcc #运营商类型，详情看下方
+  usertype: cmcc #运营商类型，详情看下方文字说明
   password: "" #密码
 meta: #登录参数
   "n": "200"
@@ -60,18 +65,19 @@ settings:
     write_file: false #写日志文件
     log_path: ./ #日志文件存放目录路径
     log_name: "" #指定日志文件名
-  ddns: # 校园网内网 ip ddns
+  ddns: #校园网内网 ip ddns
     enable: false
     domain: www.example.com
     ttl: 600
-    provider: "cloudflare" # dns provider 配置见 DDNS 说明
-    #zone: "xxxx"
-    #token: "xxxx"
+    provider: "cloudflare"
+    config: #需要根据 provider 类型配置字段名，见 DDNS 说明
+      zone: "xxxx"
+      token: "xxxx"
 ```
 
 登录参数从原网页登陆时对 `/srun_portal` 的请求抓取，抓取时请把浏览器控制台的 `preserve log`（保留日志）启用。
 
-运营商类型在原网页会被自动附加在账号后，请把 `@` 后面的部分填入 `user_type`，没有则留空（删掉默认的）
+运营商类型在原网页会被自动附加在账号后，请把 `@` 后Go 语言版。GO 语言可以直接交叉编译出 mips 架构可执行程序（路由器）（主流平台更不用说了），从而免除安装环境。面的部分填入 `user_type`，没有则留空（删掉默认的）
 
 ## :bow_and_arrow: DDNS
 
@@ -91,7 +97,7 @@ settings:
 
 登录请求的网卡绑定在 Linux 下稳定生效，但在其它系统中可能无法成功绑定。如果要在 windows 等系统寻求稳定的多拨效果，可以考虑使用 docker 的网桥或系统层面的绑定。
 
-请注意应该避免在多拨中使用同一个账号。因为在大部分学校中即使多拨成功，同一账号在同一个网关下的多个设备也是共享带宽限制的，这意味着多拨没有效果。
+请注意，部分学校中在多拨中使用同一个账号时可能即使多拨成功，同一账号在同一个网关下的多个设备可能会共享带宽限制，这意味着多拨没有效果。
 
 你可以通过配置文件中的 `settings.basic.interfaces` 指定网卡，也可以在将该配置留空的情况下使用 `--interface` 指定网卡。
 
@@ -114,7 +120,7 @@ docker run -v path_to_config:/data/Config.yaml mmx233/bitsrunlogin-go:latest
 如果需要在其他系统或架构使用，可能需要更改构建层与底层镜像，目前使用的 alpine 并不支持 linux 之外的系统
 
 ```shell
-git clone https://github.com/Mmx233/BitSrunLoginGo.git
+git clone https://github.com/VPCU/BitSrunLoginGo.git
 cd BitSrunLoginGo
 docker build . --file Dockerfile --tag mmx233/bitsrunlogin-go:latest
 ```
@@ -125,7 +131,7 @@ docker build . --file Dockerfile --tag mmx233/bitsrunlogin-go:latest
 
 ```shell
 #直接编译本系统可执行程序：
-git clone https://github.com/Mmx233/BitSrunLoginGo.git
+git clone https://github.com/VPCU/BitSrunLoginGo.git
 cd BitSrunLoginGo
 go build ./cmd/bitsrun
 
@@ -167,7 +173,7 @@ golang 支持的系统与架构请自行查询
 package main
 
 import (
-	"github.com/Mmx233/BitSrunLoginGo/pkg/srun"
+	"github.com/VPCU/BitSrunLoginGo/pkg/srun"
 )
 
 func main() {
@@ -178,9 +184,9 @@ func main() {
         LoginInfo: srun.LoginInfo{
             Form: &srun.LoginForm{
                 Domain:   "",
-                UserName: "",
+                Username: "",
                 UserType: "",
-                PassWord: "",
+                Password: "",
             },
             Meta: &srun.LoginMeta{
                 N:    "",
