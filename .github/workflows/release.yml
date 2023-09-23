@@ -29,3 +29,4 @@ jobs:
         workdir: ./cmd/bitsrun
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CGO_ENABLED: "0"
